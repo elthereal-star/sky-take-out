@@ -10,7 +10,10 @@ import org.apache.ibatis.annotations.Select;
 @Mapper
 public interface EmployeeMapper {
 
-     Page<Employee> pageQuery(EmployeePageQueryDTO employeePageQueryDTO) ;
+    @Select("select * from employee where id=#{id}")
+    Employee getById(Long id);
+
+    Page<Employee> pageQuery(EmployeePageQueryDTO employeePageQueryDTO) ;
 
     /**
      * 根据用户名查询员工
