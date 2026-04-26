@@ -7,7 +7,14 @@ sky:
     username: root
     password: 123456
   alioss:
-    endpoint: https://oss-cn-beijing.aliyuncs.com
-    access-key-id: ${ALI_OSS_ACCESS_KEY_ID:}
-    access-key-secret: ${ALI_OSS_ACCESS_KEY_SECRET:}
-    bucket-name: web-test-bai
+    endpoint: ${ALIYUN_OSS_ENDPOINT:https://oss-cn-beijing.aliyuncs.com}
+    access-key-id: ${ALIYUN_ACCESS_KEY_ID:}
+    access-key-secret: ${ALIYUN_ACCESS_KEY_SECRET:}
+    bucket-name: ${ALIYUN_OSS_BUCKET:web-test-bai}
+  redis:
+    host: localhost
+    port: 6379
+    password: 123456
+  wechat:
+    appid: ${WECHAT_APPID:}
+    secret: ${WECHAT_SECRET:}
