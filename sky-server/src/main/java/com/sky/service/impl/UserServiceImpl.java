@@ -12,6 +12,7 @@ import com.sky.utils.HttpClientUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -35,11 +36,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User wxLogin(UserLoginDTO userLoginDTO) {
+        String code = userLoginDTO.getCode();
+        log.info("开始处理微信登录, code={}, appid='{}', appid长度={}, secret已配置={}",
+                code,
+                weChatProperties.getAppid(),
+                weChatProperties.getAppid() == null ? 0 : weChatProperties.getAppid().length(),
+                StringUtils.hasText(weChatProperties.getSecret()));
 
-        String openid = getOpenid(userLoginDTO.getCode());
+        String openid = getOpenid(code);
 
         //判断为空则抛出异常
         if(openid==null){
+            log.error("微信登录失败, 未获取到openid, code={}", code);
             throw new LoginFailedException(MessageConstant.LOGIN_FAILED);
         }
 
@@ -66,8 +74,20 @@ public class UserServiceImpl implements UserService {
         map.put("grant_type","authorization_code");
         //调用接口服务，获得当前用户的openid
         String json = HttpClientUtil.doGet(WX_LOGIN,map);
+        log.info("调用微信jscode2session返回, code={}, response={}", code, json);
+
+        if (!StringUtils.hasText(json)) {
+            log.error("调用微信jscode2session失败, 返回为空, code={}", code);
+            return null;
+        }
 
         JSONObject jsonObject = JSONObject.parseObject(json);
+        if (jsonObject.containsKey("errcode")) {
+            log.error("微信jscode2session返回错误, code={}, errcode={}, errmsg={}",
+                    code,
+                    jsonObject.getString("errcode"),
+                    jsonObject.getString("errmsg"));
+        }
         String openid = jsonObject.getString("openid");
         return openid;
     }
